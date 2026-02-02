@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colony Platformer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Courier New', monospace;
+    color: #e0e0e8;
+    overflow: hidden;
+  }
+  #game-container {
+    position: relative;
+    border: 2px solid #2a2a4a;
+    border-radius: 4px;
+    box-shadow: 0 0 40px rgba(123,104,238,0.15);
+  }
+  canvas {
+    display: block;
+    background: #12121e;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+  #hud {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    pointer-events: none;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  }
+  #hud .score { color: #fbbf24; }
+  #hud .lives { color: #f87171; }
+  #hud .level { color: #60a5fa; }
+  #start-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,10,26,0.92);
+    z-index: 10;
+  }
+  #start-screen h1 {
+    font-size: 2.2rem;
+    color: #7b68ee;
+    margin-bottom: 8px;
+  }
+  #start-screen .sub {
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 32px;
+  }
+  #start-screen .prompt {
+    color: #aaa;
+    font-size: 1rem;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+  #start-screen .credits {
+    position: absolute;
+    bottom: 16px;
+    color: #444;
+    font-size: 0.7rem;
+  }
+  #start-screen .credits a { color: #555; }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  #audio-toggle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: 1px solid #333;
+    color: #888;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.75rem;
+    z-index: 20;
+  }
+  #audio-toggle:hover { border-color: #666; color: #ccc; }
+  .wip-banner {
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 12px;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .wip-banner a { color: #7b68ee; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <canvas id="game" width="1280" height="480"></canvas>
+
+  <div id="hud" style="display:none">
+    <span class="score">SCORE: <span id="score-val">0</span></span>
+    <span class="level">LEVEL <span id="level-val">1</span></span>
+    <span class="lives">♥♥♥</span>
+  </div>
+
+  <div id="start-screen">
+    <h1>🎮 Colony Platformer</h1>
+    <p class="sub">Built by AI agents, played by humans</p>
+    <p class="prompt">[ Press SPACE or click to start ]</p>
+    <p class="credits">
+      A collaborative project by
+      <a href="https://thecolony.cc">The Colony</a>
+    </p>
+  </div>
+
+  <button id="audio-toggle" onclick="toggleAudio()">🔊</button>
+</div>
+
+<p class="wip-banner">
+  🚧 Work in progress — engine & levels coming soon<br>
+  <a href="audio-test.html">Audio demo</a> ·
+  <a href="https://github.com/jeletor/colony-game">Source</a> ·
+  <a href="https://thecolony.cc/post/4dbf582f-144b-40fd-b099-114600c71080">Colony thread</a>
+</p>
+
+<!-- Modules -->
+<script src="js/audio.js"></script>
+<!-- <script src="js/input.js"></script> -->
+<!-- <script src="js/player.js"></script> -->
+<!-- <script src="js/enemies.js"></script> -->
+<!-- <script src="js/levels.js"></script> -->
+<!-- <script src="js/engine.js"></script> -->
+
+<script>
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const startScreen = document.getElementById('start-screen');
+
+  let gameStarted = false;
+
+  function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+
+    Audio.init();
+    Audio.startMusic();
+
+    startScreen.style.display = 'none';
+    document.getElementById('hud').style.display = 'flex';
+
+    // Placeholder: draw a simple scene until engine.js lands
+    drawPlaceholder();
+  }
+
+  function drawPlaceholder() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Sky gradient
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, '#1a1a3e');
+    grad.addColorStop(1, '#0a0a1a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Ground
+    ctx.fillStyle = '#2a5a2a';
+    ctx.fillRect(0, canvas.height - 64, canvas.width, 64);
+    ctx.fillStyle = '#3a7a3a';
+    ctx.fillRect(0, canvas.height - 64, canvas.width, 4);
+
+    // Platforms
+    ctx.fillStyle = '#4a4a6a';
+    ctx.fillRect(200, 320, 160, 16);
+    ctx.fillRect(500, 260, 192, 16);
+    ctx.fillRect(800, 300, 128, 16);
+    ctx.fillRect(1000, 220, 160, 16);
+
+    // Player placeholder
+    ctx.fillStyle = '#7b68ee';
+    ctx.fillRect(100, canvas.height - 64 - 40, 24, 40);
+    // Eyes
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(116, canvas.height - 64 - 34, 4, 4);
+    ctx.fillRect(110, canvas.height - 64 - 34, 4, 4);
+
+    // Coins
+    ctx.fillStyle = '#fbbf24';
+    [260, 560, 600, 850, 1060].forEach(x => {
+      ctx.beginPath();
+      ctx.arc(x, 290, 8, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // "Waiting for engine" message
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '16px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText('Engine module coming soon — audio is playing!', canvas.width / 2, canvas.height / 2);
+    ctx.fillText('Press M to toggle music · Try the audio demo link below', canvas.width / 2, canvas.height / 2 + 24);
+  }
+
+  // Start on space or click
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.key === ' ') {
+      e.preventDefault();
+      startGame();
+    }
+    // Audio controls even after start
+    if (e.key === 'm' || e.key === 'M') {
+      Audio.init();
+      if (Audio.isMusicPlaying) Audio.stopMusic();
+      else Audio.startMusic();
+    }
+  });
+
+  startScreen.addEventListener('click', startGame);
+
+  function toggleAudio() {
+    Audio.init();
+    const btn = document.getElementById('audio-toggle');
+    const muted = Audio.toggleMute();
+    btn.textContent = muted ? '🔇' : '🔊';
+  }
+</script>
+</body>
+</html>
