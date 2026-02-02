@@ -61,8 +61,16 @@
   #start-screen .sub {
     color: #666;
     font-size: 0.85rem;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
+  #start-screen .controls {
+    color: #555;
+    font-size: 0.75rem;
+    margin-bottom: 24px;
+    line-height: 1.8;
+    text-align: center;
+  }
+  #start-screen .controls span { color: #7b68ee; }
   #start-screen .prompt {
     color: #aaa;
     font-size: 1rem;
@@ -118,6 +126,11 @@
   <div id="start-screen">
     <h1>🎮 Colony Platformer</h1>
     <p class="sub">Built by AI agents, played by humans</p>
+    <div class="controls">
+      <span>←/A</span> <span>→/D</span> Move &nbsp;·&nbsp;
+      <span>SPACE</span> / <span>↑/W</span> Jump &nbsp;·&nbsp;
+      <span>M</span> Toggle music
+    </div>
     <p class="prompt">[ Press SPACE or click to start ]</p>
     <p class="credits">
       A collaborative project by
@@ -129,25 +142,21 @@
 </div>
 
 <p class="wip-banner">
-  🚧 Work in progress — engine & levels coming soon<br>
-  <a href="audio-test.html">Audio demo</a> ·
   <a href="https://github.com/jeletor/colony-game">Source</a> ·
-  <a href="https://thecolony.cc/post/4dbf582f-144b-40fd-b099-114600c71080">Colony thread</a>
+  <a href="https://thecolony.cc/post/4dbf582f-144b-40fd-b099-114600c71080">Colony thread</a> ·
+  <a href="audio-test.html">Audio demo</a>
 </p>
 
-<!-- Modules -->
+<!-- Modules (load order matters) -->
 <script src="js/audio.js"></script>
-<!-- <script src="js/input.js"></script> -->
-<!-- <script src="js/player.js"></script> -->
-<!-- <script src="js/enemies.js"></script> -->
-<!-- <script src="js/levels.js"></script> -->
-<!-- <script src="js/engine.js"></script> -->
+<script src="js/input.js"></script>
+<script src="js/player.js"></script>
+<script src="js/enemies.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/engine.js"></script>
 
 <script>
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
   const startScreen = document.getElementById('start-screen');
-
   let gameStarted = false;
 
   function startGame() {
@@ -160,64 +169,16 @@
     startScreen.style.display = 'none';
     document.getElementById('hud').style.display = 'flex';
 
-    // Placeholder: draw a simple scene until engine.js lands
-    drawPlaceholder();
-  }
-
-  function drawPlaceholder() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Sky gradient
-    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, '#1a1a3e');
-    grad.addColorStop(1, '#0a0a1a');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Ground
-    ctx.fillStyle = '#2a5a2a';
-    ctx.fillRect(0, canvas.height - 64, canvas.width, 64);
-    ctx.fillStyle = '#3a7a3a';
-    ctx.fillRect(0, canvas.height - 64, canvas.width, 4);
-
-    // Platforms
-    ctx.fillStyle = '#4a4a6a';
-    ctx.fillRect(200, 320, 160, 16);
-    ctx.fillRect(500, 260, 192, 16);
-    ctx.fillRect(800, 300, 128, 16);
-    ctx.fillRect(1000, 220, 160, 16);
-
-    // Player placeholder
-    ctx.fillStyle = '#7b68ee';
-    ctx.fillRect(100, canvas.height - 64 - 40, 24, 40);
-    // Eyes
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(116, canvas.height - 64 - 34, 4, 4);
-    ctx.fillRect(110, canvas.height - 64 - 34, 4, 4);
-
-    // Coins
-    ctx.fillStyle = '#fbbf24';
-    [260, 560, 600, 850, 1060].forEach(x => {
-      ctx.beginPath();
-      ctx.arc(x, 290, 8, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // "Waiting for engine" message
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.font = '16px Courier New';
-    ctx.textAlign = 'center';
-    ctx.fillText('Engine module coming soon — audio is playing!', canvas.width / 2, canvas.height / 2);
-    ctx.fillText('Press M to toggle music · Try the audio demo link below', canvas.width / 2, canvas.height / 2 + 24);
+    Engine.init('game');
+    Engine.start();
   }
 
   // Start on space or click
   document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' || e.key === ' ') {
+    if ((e.code === 'Space' || e.key === ' ') && !gameStarted) {
       e.preventDefault();
       startGame();
     }
-    // Audio controls even after start
     if (e.key === 'm' || e.key === 'M') {
       Audio.init();
       if (Audio.isMusicPlaying) Audio.stopMusic();
